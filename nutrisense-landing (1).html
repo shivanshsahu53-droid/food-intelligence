@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NutriSense — Know What You Eat</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --black: #060a06;
+    --dark: #0c130c;
+    --card: #111911;
+    --border: #1a2b1a;
+    --green: #5adf82;
+    --lime: #b8f04a;
+    --amber: #f4b942;
+    --teal: #3dd9c0;
+    --red: #ff6b6b;
+    --text: #e8f2e8;
+    --muted: #5a7a5a;
+    --white: #f0f7f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 48px;
+    border-bottom: 1px solid rgba(90,223,130,0.08);
+    background: rgba(6,10,6,0.85);
+    backdrop-filter: blur(20px);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 700;
+    color: var(--green);
+    letter-spacing: -0.02em;
+  }
+
+  .nav-logo span { color: var(--white); }
+
+  .nav-links {
+    display: flex; gap: 36px; list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted); text-decoration: none;
+    font-size: 14px; font-weight: 400;
+    transition: color 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-links a:hover { color: var(--green); }
+
+  .nav-cta {
+    background: var(--green); color: var(--black);
+    border: none; padding: 10px 24px; border-radius: 100px;
+    font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.02em;
+  }
+
+  .nav-cta:hover { background: var(--lime); transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 120px 48px 80px;
+    position: relative; overflow: hidden;
+  }
+
+  .hero-orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(120px); pointer-events: none;
+  }
+
+  .hero-orb-1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(90,223,130,0.12) 0%, transparent 70%);
+    top: -100px; left: -100px;
+    animation: float1 8s ease-in-out infinite;
+  }
+
+  .hero-orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(184,240,74,0.08) 0%, transparent 70%);
+    top: 40%; right: -50px;
+    animation: float2 10s ease-in-out infinite;
+  }
+
+  .hero-orb-3 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(244,185,66,0.06) 0%, transparent 70%);
+    bottom: 0; left: 40%;
+    animation: float1 12s ease-in-out infinite reverse;
+  }
+
+  @keyframes float1 {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
+  }
+
+  @keyframes float2 {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(20px) scale(0.95); }
+  }
+
+  .hero-inner {
+    max-width: 1200px; margin: 0 auto; width: 100%;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+    position: relative; z-index: 1;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(90,223,130,0.08); border: 1px solid rgba(90,223,130,0.2);
+    border-radius: 100px; padding: 6px 16px; margin-bottom: 28px;
+    font-size: 12px; color: var(--green); letter-spacing: 0.12em; text-transform: uppercase;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-badge-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(42px, 5vw, 72px);
+    font-weight: 900; line-height: 1.05;
+    letter-spacing: -0.03em;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero-title em {
+    font-style: italic; color: var(--green);
+    display: block;
+  }
+
+  .hero-sub {
+    margin-top: 24px; font-size: 17px;
+    color: var(--muted); line-height: 1.7; font-weight: 300;
+    max-width: 420px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex; gap: 16px; margin-top: 40px; flex-wrap: wrap;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--green); color: var(--black);
+    border: none; padding: 16px 32px; border-radius: 100px;
+    font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: all 0.25s;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .btn-primary:hover {
+    background: var(--lime);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(90,223,130,0.3);
+  }
+
+  .btn-ghost {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border); padding: 16px 32px; border-radius: 100px;
+    font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 400;
+    cursor: pointer; transition: all 0.25s;
+  }
+
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+  .hero-stats {
+    display: flex; gap: 32px; margin-top: 48px;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .stat-item { }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; color: var(--white);
+    font-weight: 700;
+  }
+
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── PHONE MOCKUPS ── */
+  .phones-container {
+    position: relative; height: 620px;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .phone-wrap {
+    position: absolute;
+    transition: transform 0.4s ease;
+  }
+
+  .phone-wrap:hover { transform: translateY(-8px) !important; }
+
+  .phone-wrap-1 { left: 60px; top: 0; z-index: 3; }
+  .phone-wrap-2 { left: 180px; top: 60px; z-index: 2; filter: brightness(0.8); }
+
+  .phone-frame {
+    width: 220px; height: 460px;
+    background: #0f1a0f;
+    border-radius: 36px;
+    border: 2px solid rgba(90,223,130,0.25);
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,0.8),
+      0 40px 80px rgba(0,0,0,0.7),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .phone-notch {
+    width: 70px; height: 20px;
+    background: #0a120a;
+    border-radius: 0 0 14px 14px;
+    margin: 0 auto;
+    position: relative; z-index: 2;
+  }
+
+  .phone-screen {
+    position: absolute; inset: 0;
+    padding: 24px 14px 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+
+  /* Screen 1: Scanner */
+  .scan-viewfinder {
+    width: 100%; height: 140px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #0a1f0a, #112011);
+    border: 1px solid rgba(90,223,130,0.2);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .scan-line {
+    position: absolute; left: 10%; right: 10%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    animation: scanLine 2s ease-in-out infinite;
+    box-shadow: 0 0 12px var(--green);
+  }
+
+  @keyframes scanLine {
+    0% { top: 20%; opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { top: 80%; opacity: 0; }
+  }
+
+  .scan-corners::before,
+  .scan-corners::after {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: var(--green);
+    border-style: solid;
+  }
+
+  .scan-corners::before {
+    top: 8px; left: 8px;
+    border-width: 2px 0 0 2px;
+    border-radius: 4px 0 0 0;
+  }
+
+  .scan-corners::after {
+    bottom: 8px; right: 8px;
+    border-width: 0 2px 2px 0;
+    border-radius: 0 0 4px 0;
+  }
+
+  .food-emoji-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 6px; padding: 8px;
+  }
+
+  .food-emoji-item {
+    aspect-ratio: 1; border-radius: 8px;
+    background: rgba(90,223,130,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    border: 1px solid rgba(90,223,130,0.1);
+  }
+
+  .phone-result-card {
+    background: rgba(90,223,130,0.08);
+    border: 1px solid rgba(90,223,130,0.2);
+    border-radius: 10px; padding: 8px 10px;
+    flex-shrink: 0;
+  }
+
+  .result-label { font-size: 9px; color: var(--green); letter-spacing: 0.1em; text-transform: uppercase; }
+  .result-val { font-size: 12px; color: var(--white); margin-top: 2px; line-height: 1.3; }
+
+  .phone-bar-row {
+    display: flex; flex-direction: column; gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .bar-item { display: flex; align-items: center; gap: 6px; }
+  .bar-label { font-size: 9px; color: var(--muted); width: 40px; }
+  .bar-track { flex: 1; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; }
+
+  /* Screen 2: Dashboard */
+  .dash-header {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
+  }
+
+  .dash-greeting { font-size: 11px; color: var(--muted); }
+  .dash-name { font-size: 15px; color: var(--white); font-weight: 600; margin-top: 2px; }
+
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--green), var(--teal));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .ring-container {
+    display: flex; justify-content: center; align-items: center;
+    padding: 12px 0; flex-shrink: 0;
+    position: relative;
+  }
+
+  .ring-svg { width: 100px; height: 100px; }
+
+  .ring-center-text {
+    position: absolute; text-align: center;
+  }
+
+  .ring-kcal { font-size: 18px; color: var(--white); font-weight: 700; }
+  .ring-kcal-label { font-size: 8px; color: var(--muted); }
+
+  .macro-pills {
+    display: flex; gap: 6px; justify-content: center; flex-shrink: 0;
+  }
+
+  .macro-pill {
+    flex: 1; background: rgba(255,255,255,0.04);
+    border-radius: 8px; padding: 6px 4px; text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .macro-pill-val { font-size: 12px; color: var(--white); font-weight: 600; }
+  .macro-pill-label { font-size: 8px; color: var(--muted); margin-top: 2px; }
+
+  .meal-log { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+
+  .meal-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .meal-icon { font-size: 14px; }
+  .meal-name { font-size: 10px; color: var(--text); flex: 1; }
+  .meal-kcal { font-size: 10px; color: var(--muted); }
+
+  /* ── SECTION COMMON ── */
+  section { padding: 100px 48px; }
+  .section-inner { max-width: 1200px; margin: 0 auto; }
+
+  .section-tag {
+    display: inline-block;
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--green); margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700; line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  .section-sub {
+    font-size: 17px; color: var(--muted); line-height: 1.7;
+    max-width: 520px; font-weight: 300;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .steps-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; background: var(--border);
+    border: 1px solid var(--border); border-radius: 20px;
+    overflow: hidden; margin-top: 60px;
+  }
+
+  .step-card {
+    background: var(--card); padding: 36px 28px;
+    position: relative; transition: background 0.3s;
+  }
+
+  .step-card:hover { background: #141f14; }
+
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px; font-weight: 900;
+    color: rgba(90,223,130,0.1); line-height: 1;
+    margin-bottom: 20px;
+    position: absolute; top: 20px; right: 24px;
+  }
+
+  .step-icon { font-size: 36px; margin-bottom: 16px; }
+
+  .step-title {
+    font-size: 17px; font-weight: 600; margin-bottom: 10px;
+    color: var(--white);
+  }
+
+  .step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ── FEATURES BENTO ── */
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: 120px;
+    gap: 12px;
+    margin-top: 60px;
+  }
+
+  .bento-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px;
+    transition: all 0.3s; cursor: default;
+    overflow: hidden; position: relative;
+  }
+
+  .bento-card:hover {
+    border-color: rgba(90,223,130,0.25);
+    transform: translateY(-2px);
+  }
+
+  .bento-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 0% 0%, rgba(90,223,130,0.04) 0%, transparent 60%);
+    opacity: 0; transition: opacity 0.3s;
+  }
+
+  .bento-card:hover::before { opacity: 1; }
+
+  .b1 { grid-column: span 5; grid-row: span 3; }
+  .b2 { grid-column: span 7; grid-row: span 2; }
+  .b3 { grid-column: span 4; grid-row: span 2; }
+  .b4 { grid-column: span 3; grid-row: span 2; }
+  .b5 { grid-column: span 4; grid-row: span 2; }
+  .b6 { grid-column: span 5; grid-row: span 2; }
+  .b7 { grid-column: span 3; grid-row: span 2; }
+
+  .bento-tag {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 100px;
+    display: inline-block; margin-bottom: 12px;
+  }
+
+  .bento-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px; margin-bottom: 10px; line-height: 1.2;
+  }
+
+  .bento-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  .bento-big-icon { font-size: 64px; margin-bottom: 20px; line-height: 1; }
+
+  .glucose-chart {
+    margin-top: 16px; height: 60px; position: relative;
+  }
+
+  .glucose-line {
+    width: 100%; height: 100%;
+  }
+
+  /* ── APP SCREENS SECTION ── */
+  .screens-section {
+    background: var(--dark);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .screens-scroll {
+    display: flex; gap: 24px; margin-top: 60px;
+    overflow-x: auto; padding-bottom: 20px;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+
+  .screen-item { flex-shrink: 0; }
+
+  .screen-label {
+    text-align: center; font-size: 13px; color: var(--muted);
+    margin-top: 16px; letter-spacing: 0.05em;
+  }
+
+  /* ── TESTIMONIALS / USERS ── */
+  .users-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: 60px;
+  }
+
+  .user-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px;
+    transition: all 0.3s;
+  }
+
+  .user-card:hover {
+    border-color: rgba(90,223,130,0.2);
+    transform: translateY(-3px);
+  }
+
+  .user-quote {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px; line-height: 1.6; color: var(--white);
+    margin-bottom: 20px; font-style: italic;
+  }
+
+  .user-info { display: flex; align-items: center; gap: 12px; }
+
+  .user-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+
+  .user-name { font-size: 14px; font-weight: 600; color: var(--white); }
+  .user-role { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ── PRICING ── */
+  .pricing-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    max-width: 700px; margin: 60px auto 0;
+  }
+
+  .pricing-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 36px;
+    position: relative; transition: all 0.3s;
+  }
+
+  .pricing-card.featured {
+    border-color: var(--green);
+    background: linear-gradient(135deg, rgba(90,223,130,0.06) 0%, var(--card) 100%);
+  }
+
+  .pricing-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--green); color: var(--black);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    padding: 4px 14px; border-radius: 100px; text-transform: uppercase;
+  }
+
+  .pricing-name { font-size: 14px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+
+  .pricing-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px; font-weight: 700; color: var(--white);
+    line-height: 1;
+  }
+
+  .pricing-price sup { font-size: 20px; vertical-align: top; margin-top: 10px; }
+  .pricing-price span { font-size: 16px; color: var(--muted); font-family: 'Outfit', sans-serif; font-weight: 300; }
+
+  .pricing-features { margin-top: 24px; display: flex; flex-direction: column; gap: 10px; }
+
+  .pricing-feat {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: var(--muted);
+  }
+
+  .pricing-feat .check { color: var(--green); font-size: 16px; }
+
+  .pricing-btn {
+    width: 100%; margin-top: 28px; padding: 14px;
+    border-radius: 100px; font-family: 'Outfit', sans-serif;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .pricing-btn.primary {
+    background: var(--green); color: var(--black); border: none;
+  }
+
+  .pricing-btn.primary:hover { background: var(--lime); }
+
+  .pricing-btn.ghost {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .pricing-btn.ghost:hover { border-color: var(--green); color: var(--green); }
+
+  /* ── CTA SECTION ── */
+  .cta-section {
+    padding: 120px 48px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+
+  .cta-orb {
+    position: absolute; width: 800px; height: 800px;
+    border-radius: 50%; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(90,223,130,0.08) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .cta-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 900; line-height: 1.1;
+    letter-spacing: -0.03em;
+    position: relative; z-index: 1;
+  }
+
+  .cta-sub {
+    color: var(--muted); font-size: 18px; margin-top: 20px;
+    max-width: 480px; margin-left: auto; margin-right: auto;
+    line-height: 1.6; position: relative; z-index: 1;
+  }
+
+  .cta-actions {
+    display: flex; gap: 16px; justify-content: center;
+    margin-top: 40px; flex-wrap: wrap;
+    position: relative; z-index: 1;
+  }
+
+  .email-input-row {
+    display: flex; gap: 0; max-width: 440px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 100px; padding: 5px 5px 5px 20px;
+    transition: border-color 0.2s;
+  }
+
+  .email-input-row:focus-within { border-color: var(--green); }
+
+  .email-input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-family: 'Outfit', sans-serif; font-size: 15px;
+  }
+
+  .email-input::placeholder { color: var(--muted); }
+
+  .email-submit {
+    background: var(--green); color: var(--black);
+    border: none; padding: 10px 20px; border-radius: 100px;
+    font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; white-space: nowrap; transition: background 0.2s;
+  }
+
+  .email-submit:hover { background: var(--lime); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--muted); font-size: 13px;
+    max-width: 100%; flex-wrap: wrap; gap: 16px;
+  }
+
+  .footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; color: var(--green);
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 1px; height: 40px; background: var(--border);
+    display: inline-block; vertical-align: middle; margin: 0 20px;
+  }
+
+  /* ── RISK TICKER ── */
+  .risk-ticker {
+    width: 100%; overflow: hidden; border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0; background: rgba(90,223,130,0.03);
+  }
+
+  .ticker-inner {
+    display: flex; gap: 48px;
+    animation: ticker 20s linear infinite;
+    white-space: nowrap;
+  }
+
+  .ticker-item {
+    font-size: 13px; color: var(--muted); display: flex;
+    align-items: center; gap: 8px;
+  }
+
+  .ticker-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-inner { grid-template-columns: 1fr; }
+    .phones-container { height: 300px; }
+    section { padding: 60px 24px; }
+    .steps-grid { grid-template-columns: repeat(2, 1fr); }
+    .bento { grid-template-columns: 1fr 1fr; grid-auto-rows: auto; }
+    .b1,.b2,.b3,.b4,.b5,.b6,.b7 { grid-column: span 1; grid-row: span 1; }
+    .users-grid { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; text-align: center; padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Nutri<span>Sense</span></div>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#screens">App</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <button class="nav-cta">Join Waitlist →</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Now in Early Access
+      </div>
+      <h1 class="hero-title">
+        Finally know<br/>
+        <em>what you're eating</em>
+      </h1>
+      <p class="hero-sub">
+        NutriSense is a visual food AI that scans, decodes, and tracks everything you eat — then tells you what it's doing to your body before disease develops.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-primary">Start for Free →</button>
+        <button class="btn-ghost">Watch Demo</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">9M+</div>
+          <div class="stat-label">Products in database</div>
+        </div>
+        <div class="divider"></div>
+        <div class="stat-item">
+          <div class="stat-num">AI</div>
+          <div class="stat-label">Personalized to your body</div>
+        </div>
+        <div class="divider"></div>
+        <div class="stat-item">
+          <div class="stat-num">0</div>
+          <div class="stat-label">Wearable required</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONE MOCKUPS -->
+    <div class="phones-container">
+
+      <!-- Phone 1: Scanner -->
+      <div class="phone-wrap phone-wrap-1">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <!-- Status & title -->
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+              <span style="font-size:11px;color:var(--muted);">Fridge Scanner</span>
+              <span style="font-size:10px;color:var(--green);background:rgba(90,223,130,0.1);padding:2px 8px;border-radius:100px;">● Live</span>
+            </div>
+
+            <!-- Viewfinder -->
+            <div class="scan-viewfinder scan-corners">
+              <div class="scan-line"></div>
+              <div class="food-emoji-grid">
+                <div class="food-emoji-item">🥛</div>
+                <div class="food-emoji-item">🥕</div>
+                <div class="food-emoji-item">🍎</div>
+                <div class="food-emoji-item">🧀</div>
+                <div class="food-emoji-item">🥦</div>
+                <div class="food-emoji-item">🫐</div>
+              </div>
+            </div>
+
+            <!-- Result -->
+            <div class="phone-result-card">
+              <div class="result-label">⚠ Detected Issue</div>
+              <div class="result-val">Milk expires in 1 day. Cheese looks fresh (7d left).</div>
+            </div>
+
+            <!-- Bars -->
+            <div class="phone-bar-row">
+              <div style="font-size:9px;color:var(--muted);margin-bottom:2px;letter-spacing:0.08em;text-transform:uppercase;">Freshness Status</div>
+              <div class="bar-item">
+                <span class="bar-label" style="font-size:8px;">🥛 Milk</span>
+                <div class="bar-track"><div class="bar-fill" style="width:15%;background:var(--red);"></div></div>
+              </div>
+              <div class="bar-item">
+                <span class="bar-label" style="font-size:8px;">🧀 Cheese</span>
+                <div class="bar-track"><div class="bar-fill" style="width:80%;background:var(--green);"></div></div>
+              </div>
+              <div class="bar-item">
+                <span class="bar-label" style="font-size:8px;">🥦 Broccoli</span>
+                <div class="bar-track"><div class="bar-fill" style="width:55%;background:var(--amber);"></div></div>
+              </div>
+            </div>
+
+            <!-- Bottom action -->
+            <div style="background:var(--green);border-radius:10px;padding:8px;text-align:center;margin-top:auto;flex-shrink:0;">
+              <span style="font-size:11px;color:var(--black);font-weight:600;">Scan Label →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone 2: Dashboard -->
+      <div class="phone-wrap phone-wrap-2">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="dash-header" style="margin-top:4px;">
+              <div>
+                <div class="dash-greeting">Good morning,</div>
+                <div class="dash-name">Sarah 👋</div>
+              </div>
+              <div class="avatar">😊</div>
+            </div>
+
+            <!-- Calorie Ring -->
+            <div class="ring-container">
+              <svg class="ring-svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(90,223,130,0.1)" stroke-width="8"/>
+                <circle cx="50" cy="50" r="40" fill="none" stroke="url(#ringGrad)" stroke-width="8"
+                  stroke-dasharray="175 251" stroke-dashoffset="62" stroke-linecap="round"/>
+                <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(244,185,66,0.15)" stroke-width="5"/>
+                <circle cx="50" cy="50" r="30" fill="none" stroke="var(--amber)" stroke-width="5"
+                  stroke-dasharray="100 188" stroke-dashoffset="47" stroke-linecap="round"/>
+                <defs>
+                  <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#5adf82"/>
+                    <stop offset="100%" stop-color="#b8f04a"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="ring-center-text">
+                <div class="ring-kcal">1,240</div>
+                <div class="ring-kcal-label">of 1,800 kcal</div>
+              </div>
+            </div>
+
+            <!-- Macros -->
+            <div class="macro-pills">
+              <div class="macro-pill">
+                <div class="macro-pill-val" style="color:var(--green);">62g</div>
+                <div class="macro-pill-label">Protein</div>
+              </div>
+              <div class="macro-pill">
+                <div class="macro-pill-val" style="color:var(--amber);">148g</div>
+                <div class="macro-pill-label">Carbs</div>
+              </div>
+              <div class="macro-pill">
+                <div class="macro-pill-val" style="color:var(--teal);">41g</div>
+                <div class="macro-pill-label">Fat</div>
+              </div>
+            </div>
+
+            <!-- Meal log -->
+            <div class="meal-log">
+              <div style="font-size:9px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:4px;">Today's meals</div>
+              <div class="meal-row">
+                <span class="meal-icon">🥣</span>
+                <span class="meal-name">Greek Yogurt Bowl</span>
+                <span class="meal-kcal">320 kcal</span>
+              </div>
+              <div class="meal-row">
+                <span class="meal-icon">🥗</span>
+                <span class="meal-name">Caesar Salad</span>
+                <span class="meal-kcal">480 kcal</span>
+              </div>
+              <div class="meal-row">
+                <span class="meal-icon">🍎</span>
+                <span class="meal-name">Apple + Almonds</span>
+                <span class="meal-kcal">220 kcal</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="risk-ticker">
+  <div class="ticker-inner">
+    <span class="ticker-item"><span class="ticker-dot"></span>Scan food in seconds</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Understand every ingredient</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Track calories without counting</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Detect spoilage before it happens</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Connect glucose monitor data</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Works for kids and families</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>No wearable required</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Prevent disease before it starts</span>
+    <!-- repeat for seamless loop -->
+    <span class="ticker-item"><span class="ticker-dot"></span>Scan food in seconds</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Understand every ingredient</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Track calories without counting</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Detect spoilage before it happens</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Connect glucose monitor data</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Works for kids and families</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>No wearable required</span>
+    <span class="ticker-item"><span class="ticker-dot"></span>Prevent disease before it starts</span>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-inner">
+    <div class="section-tag">↓ How It Works</div>
+    <h2 class="section-title">Four steps to food clarity</h2>
+    <p class="section-sub">No manual entry. No complex setup. Just point your camera and let the AI do the work.</p>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">📷</div>
+        <div class="step-title">Scan</div>
+        <div class="step-desc">Point your phone at food in your fridge or any supermarket product. AI identifies it instantly.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">🔬</div>
+        <div class="step-title">Decode</div>
+        <div class="step-desc">Every ingredient is explained in plain language. No jargon. No chemistry degree needed.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">📊</div>
+        <div class="step-title">Track</div>
+        <div class="step-desc">Build your food journal automatically. See weekly patterns and what your body is actually getting.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-icon">🔮</div>
+        <div class="step-title">Predict</div>
+        <div class="step-desc">The AI builds a model of YOUR body — and tells you what risks are building before they become problems.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES BENTO -->
+<section id="features" style="padding-top:0;">
+  <div class="section-inner">
+    <div class="section-tag">↓ Features</div>
+    <h2 class="section-title">Not another calorie counter</h2>
+    <p class="section-sub">NutriSense is a complete food intelligence layer — from what's in your fridge to what's happening in your body.</p>
+
+    <div class="bento">
+
+      <div class="bento-card b1" style="background:linear-gradient(135deg,rgba(90,223,130,0.08),var(--card));">
+        <div class="bento-big-icon">📷</div>
+        <div class="bento-tag" style="background:rgba(90,223,130,0.1);color:var(--green);">Vision AI</div>
+        <div class="bento-title">Spoilage<br/>Scanner</div>
+        <div class="bento-desc">Detects mold, discoloration, and texture changes before you open the packaging. Saves money. Prevents food poisoning.</div>
+      </div>
+
+      <div class="bento-card b2">
+        <div class="bento-tag" style="background:rgba(96,165,250,0.1);color:#60a5fa;">NLP + OCR</div>
+        <div class="bento-title">Ingredient Decoder</div>
+        <div class="bento-desc">Sodium Benzoate, Carrageenan, HFCS — decoded instantly into: what it is, why it's there, and whether you should worry.</div>
+        <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+          <span style="background:rgba(248,113,113,0.15);color:#f87171;padding:4px 12px;border-radius:100px;font-size:12px;">⚠ HFCS — Limit this</span>
+          <span style="background:rgba(90,223,130,0.1);color:var(--green);padding:4px 12px;border-radius:100px;font-size:12px;">✓ Vitamin C — Good</span>
+          <span style="background:rgba(244,185,66,0.1);color:var(--amber);padding:4px 12px;border-radius:100px;font-size:12px;">~ Carrageenan — Watch</span>
+        </div>
+      </div>
+
+      <div class="bento-card b3">
+        <div class="bento-tag" style="background:rgba(192,132,252,0.1);color:#c084fc;">Diabetic Mode</div>
+        <div class="bento-title">Glucose Mapping</div>
+        <div class="bento-desc">Connect your CGM. See exactly which foods spike you and by how much.</div>
+        <div class="glucose-chart">
+          <svg class="glucose-line" viewBox="0 0 200 60" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="glucoseGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#c084fc" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#c084fc" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,45 C20,45 30,45 50,20 C70,0 80,5 100,30 C120,50 140,50 160,45 C180,40 190,42 200,40" 
+                  fill="none" stroke="#c084fc" stroke-width="2"/>
+            <path d="M0,45 C20,45 30,45 50,20 C70,0 80,5 100,30 C120,50 140,50 160,45 C180,40 190,42 200,40 L200,60 L0,60 Z" 
+                  fill="url(#glucoseGrad)"/>
+            <circle cx="50" cy="20" r="4" fill="#f87171"/>
+            <text x="52" y="16" font-size="8" fill="#f87171">spike</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="bento-card b4" style="display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:48px;text-align:center;margin-bottom:8px;">🌍</div>
+        <div class="bento-tag" style="background:rgba(61,217,192,0.1);color:var(--teal);text-align:center;display:block;margin:0 auto 8px;">Multilingual</div>
+        <div class="bento-title" style="text-align:center;font-size:16px;">Grocery lists in any language</div>
+      </div>
+
+      <div class="bento-card b5">
+        <div class="bento-tag" style="background:rgba(244,185,66,0.1);color:var(--amber);">Risk Engine</div>
+        <div class="bento-title">Future Risk Forecasting</div>
+        <div class="bento-desc">Based on 90 days of your actual eating data, see what conditions you're trending toward — and how to reverse it.</div>
+      </div>
+
+      <div class="bento-card b6">
+        <div class="bento-tag" style="background:rgba(90,223,130,0.1);color:var(--green);">Smart AI</div>
+        <div class="bento-title">Works without a wearable</div>
+        <div class="bento-desc">Most health apps need $300 of hardware. NutriSense works with just your phone camera. Wearables and CGMs are optional power-ups — not requirements.</div>
+      </div>
+
+      <div class="bento-card b7" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+        <div style="font-size:40px;margin-bottom:8px;">👶</div>
+        <div class="bento-title" style="font-size:15px;">Kids Mode</div>
+        <div class="bento-desc" style="font-size:12px;">Visual-first interface designed for children and families.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- APP SCREENS -->
+<section class="screens-section" id="screens">
+  <div class="section-inner">
+    <div class="section-tag">↓ The App</div>
+    <h2 class="section-title">Every screen, designed for clarity</h2>
+    <p class="section-sub">From first scan to weekly health report — a seamless experience that feels intelligent, not clinical.</p>
+
+    <div class="screens-scroll">
+
+      <!-- Screen: Onboarding -->
+      <div class="screen-item">
+        <div class="phone-frame" style="width:200px;height:420px;">
+          <div class="phone-notch"></div>
+          <div class="phone-screen" style="padding:20px 12px 12px;">
+            <div style="text-align:center;margin-top:20px;">
+              <div style="font-size:48px;margin-bottom:12px;">🌿</div>
+              <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--white);line-height:1.3;">Tell us<br/>about you</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5;">We personalize everything<br/>to your body & goals</div>
+            </div>
+            <div style="margin-top:24px;display:flex;flex-direction:column;gap:8px;">
+              <div style="background:rgba(90,223,130,0.08);border:1px solid rgba(90,223,130,0.2);border-radius:10px;padding:10px 12px;">
+                <div style="font-size:9px;color:var(--green);letter-spacing:0.1em;text-transform:uppercase;">Goal</div>
+                <div style="font-size:12px;color:var(--white);margin-top:2px;">Lose weight healthily</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px 12px;">
+                <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;">Age</div>
+                <div style="font-size:12px;color:var(--white);margin-top:2px;">32 years old</div>
+              </div>
+              <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px 12px;">
+                <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;">Conditions</div>
+                <div style="font-size:12px;color:var(--white);margin-top:2px;">Pre-diabetic</div>
+              </div>
+            </div>
+            <div style="background:var(--green);border-radius:10px;padding:10px;text-align:center;margin-top:auto;">
+              <span style="font-size:12px;color:var(--black);font-weight:600;">Continue →</span>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">Onboarding</div>
+      </div>
+
+      <!-- Screen: Label scan result -->
+      <div class="screen-item">
+        <div class="phone-frame" style="width:200px;height:420px;">
+          <div class="phone-notch"></div>
+          <div class="phone-screen" style="padding:20px 12px 12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:10px;color:var(--muted);">← Back</span>
+              <span style="font-size:10px;color:var(--green);background:rgba(90,223,130,0.1);padding:2px 8px;border-radius:100px;">Scanned</span>
+            </div>
+            <div style="margin-top:12px;background:rgba(255,255,255,0.04);border-radius:12px;padding:10px;display:flex;align-items:center;gap:10px;">
+              <div style="font-size:32px;">🥫</div>
+              <div>
+                <div style="font-size:13px;color:var(--white);font-weight:600;">Heinz Tomato Soup</div>
+                <div style="font-size:10px;color:var(--muted);">400g can · 240 kcal</div>
+              </div>
+            </div>
+            <div style="margin-top:10px;">
+              <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">NutriSense Score</div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="font-family:'Playfair Display',serif;font-size:36px;color:var(--amber);font-weight:700;">6.2</div>
+                <div style="flex:1;">
+                  <div style="background:rgba(255,255,255,0.05);height:6px;border-radius:3px;overflow:hidden;">
+                    <div style="width:62%;height:100%;background:linear-gradient(90deg,var(--green),var(--amber));"></div>
+                  </div>
+                  <div style="font-size:9px;color:var(--muted);margin-top:3px;">Decent · A few concerns</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px;">
+              <div style="background:rgba(90,223,130,0.08);border:1px solid rgba(90,223,130,0.2);border-radius:8px;padding:7px 10px;display:flex;align-items:center;gap:6px;">
+                <span style="color:var(--green);font-size:12px;">✓</span>
+                <span style="font-size:10px;color:var(--text);">Lycopene — powerful antioxidant</span>
+              </div>
+              <div style="background:rgba(244,185,66,0.08);border:1px solid rgba(244,185,66,0.2);border-radius:8px;padding:7px 10px;display:flex;align-items:center;gap:6px;">
+                <span style="color:var(--amber);font-size:12px;">~</span>
+                <span style="font-size:10px;color:var(--text);">High sodium (680mg per serving)</span>
+              </div>
+              <div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:7px 10px;display:flex;align-items:center;gap:6px;">
+                <span style="color:var(--red);font-size:12px;">⚠</span>
+                <span style="font-size:10px;color:var(--text);">Modified starch — limit if diabetic</span>
+              </div>
+            </div>
+            <div style="background:rgba(90,223,130,0.08);border:1px solid rgba(90,223,130,0.15);border-radius:8px;padding:8px;text-align:center;margin-top:auto;">
+              <span style="font-size:10px;color:var(--green);">+ Add to food log</span>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">Label Analysis</div>
+      </div>
+
+      <!-- Screen: Weekly Report -->
+      <div class="screen-item">
+        <div class="phone-frame" style="width:200px;height:420px;">
+          <div class="phone-notch"></div>
+          <div class="phone-screen" style="padding:20px 12px 12px;">
+            <div style="margin-top:4px;">
+              <div style="font-size:10px;color:var(--muted);">Week of March 3–9</div>
+              <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--white);margin-top:4px;">Weekly Report</div>
+            </div>
+            <!-- Bar chart -->
+            <div style="display:flex;align-items:flex-end;gap:5px;height:80px;margin-top:12px;padding:8px;background:rgba(255,255,255,0.02);border-radius:10px;border:1px solid var(--border);">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+                <div style="width:100%;background:var(--green);border-radius:3px 3px 0 0;height:40px;opacity:0.7;"></div>
+                <div style="font-size:8px;color:var(--muted);">M</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+                <div style="width:100%;background:var(--green);border-radius:3px 3px 0 0;height:55px;opacity:0.8;"></div>
+                <div style="font-size:8px;color:var(--muted);">T</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+                <div style="width:100%;background:var(--amber);border-radius:3px 3px 0 0;height:68px;"></div>
+                <div style="font-size:8px;color:var(--muted);">W</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+                <div style="width:100%;background:var(--green);border-radius:3px 3px 0 0;height:44px;opacity:0.7;"></div>
+                <div style="font-size:8px;color:var(--muted);">T</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+                <div style="width:100%;background:var(--green);border-radius:3px 3px 0 0;height:36px;opacity:0.6;"></div>
+                <div style="font-size:8px;color:var(--muted);">F</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+                <div style="width:100%;background:var(--red);border-radius:3px 3px 0 0;height:72px;"></div>
+                <div style="font-size:8px;color:var(--muted);">S</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;">
+                <div style="width:100%;background:var(--green);border-radius:3px 3px 0 0;height:48px;opacity:0.8;"></div>
+                <div style="font-size:8px;color:var(--muted);">S</div>
+              </div>
+            </div>
+
+            <!-- Insights -->
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:5px;">
+              <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;">AI Insights</div>
+              <div style="background:rgba(90,223,130,0.08);border-radius:8px;padding:8px 10px;border-left:2px solid var(--green);">
+                <div style="font-size:10px;color:var(--text);line-height:1.4;">You hit your protein goal 5 out of 7 days 💪</div>
+              </div>
+              <div style="background:rgba(248,113,113,0.08);border-radius:8px;padding:8px 10px;border-left:2px solid var(--red);">
+                <div style="font-size:10px;color:var(--text);line-height:1.4;">Saturday sugar intake was 3× your daily target ⚠</div>
+              </div>
+              <div style="background:rgba(244,185,66,0.08);border-radius:8px;padding:8px 10px;border-left:2px solid var(--amber);">
+                <div style="font-size:10px;color:var(--text);line-height:1.4;">No vegetables logged on Tuesday or Wednesday</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">Weekly Report</div>
+      </div>
+
+      <!-- Screen: Risk Report -->
+      <div class="screen-item">
+        <div class="phone-frame" style="width:200px;height:420px;">
+          <div class="phone-notch"></div>
+          <div class="phone-screen" style="padding:20px 12px 12px;">
+            <div style="margin-top:4px;">
+              <div style="font-size:10px;color:var(--muted);">Based on 90 days data</div>
+              <div style="font-family:'DM Serif Display',serif;font-size:17px;color:var(--white);margin-top:4px;line-height:1.2;">Health Risk<br/>Forecast</div>
+            </div>
+            <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;">
+              <div style="padding:10px 12px;background:rgba(90,223,130,0.06);border:1px solid rgba(90,223,130,0.15);border-radius:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                  <span style="font-size:11px;color:var(--white);">Type 2 Diabetes</span>
+                  <span style="font-size:10px;color:var(--green);">Low ↓</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.05);height:4px;border-radius:2px;">
+                  <div style="width:22%;height:100%;background:var(--green);border-radius:2px;"></div>
+                </div>
+                <div style="font-size:9px;color:var(--muted);margin-top:4px;">Improved 8% from last month</div>
+              </div>
+
+              <div style="padding:10px 12px;background:rgba(244,185,66,0.06);border:1px solid rgba(244,185,66,0.2);border-radius:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                  <span style="font-size:11px;color:var(--white);">Hypertension</span>
+                  <span style="font-size:10px;color:var(--amber);">Medium →</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.05);height:4px;border-radius:2px;">
+                  <div style="width:48%;height:100%;background:var(--amber);border-radius:2px;"></div>
+                </div>
+                <div style="font-size:9px;color:var(--muted);margin-top:4px;">High sodium intake is the cause</div>
+              </div>
+
+              <div style="padding:10px 12px;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                  <span style="font-size:11px;color:var(--white);">Iron Deficiency</span>
+                  <span style="font-size:10px;color:var(--red);">Rising ↑</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.05);height:4px;border-radius:2px;">
+                  <div style="width:65%;height:100%;background:var(--red);border-radius:2px;"></div>
+                </div>
+                <div style="font-size:9px;color:var(--muted);margin-top:4px;">Very few iron-rich foods this month</div>
+              </div>
+            </div>
+            <div style="background:var(--green);border-radius:10px;padding:9px;text-align:center;margin-top:auto;">
+              <span style="font-size:11px;color:var(--black);font-weight:600;">See AI Meal Plan →</span>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">Risk Forecast</div>
+      </div>
+
+      <!-- Screen: Smart Grocery -->
+      <div class="screen-item">
+        <div class="phone-frame" style="width:200px;height:420px;">
+          <div class="phone-notch"></div>
+          <div class="phone-screen" style="padding:20px 12px 12px;">
+            <div style="margin-top:4px;">
+              <div style="font-size:10px;color:var(--muted);">AI generated for you</div>
+              <div style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--white);margin-top:4px;">Grocery List</div>
+            </div>
+            <div style="font-size:9px;color:var(--green);margin-top:6px;background:rgba(90,223,130,0.08);padding:4px 8px;border-radius:6px;display:inline-block;">Filling 3 nutritional gaps</div>
+            <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px;">
+              <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;">For iron ↑</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 8px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">
+                <span style="font-size:16px;">🥩</span><span style="font-size:11px;flex:1;">Lean Red Meat (300g)</span><span style="font-size:9px;color:var(--muted);">Iron</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 8px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">
+                <span style="font-size:16px;">🥬</span><span style="font-size:11px;flex:1;">Spinach (200g)</span><span style="font-size:9px;color:var(--muted);">Iron</span>
+              </div>
+              <div style="font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:6px;">For sodium ↓</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 8px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">
+                <span style="font-size:16px;">🍌</span><span style="font-size:11px;flex:1;">Bananas (6 pack)</span><span style="font-size:9px;color:var(--muted);">Potassium</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 8px;background:rgba(255,255,255,0.03);border-radius:8px;border:1px solid var(--border);">
+                <span style="font-size:16px;">🥑</span><span style="font-size:11px;flex:1;">Avocados (3)</span><span style="font-size:9px;color:var(--muted);">Healthy fat</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 8px;background:rgba(90,223,130,0.06);border-radius:8px;border:1px solid rgba(90,223,130,0.15);">
+                <span style="font-size:16px;">🐟</span><span style="font-size:11px;flex:1;">Salmon fillet (2×)</span><span style="font-size:9px;color:var(--green);">Omega-3</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:auto;">
+              <div style="flex:1;background:rgba(90,223,130,0.08);border:1px solid rgba(90,223,130,0.2);border-radius:8px;padding:8px;text-align:center;">
+                <span style="font-size:10px;color:var(--green);">🌍 Translate</span>
+              </div>
+              <div style="flex:2;background:var(--green);border-radius:8px;padding:8px;text-align:center;">
+                <span style="font-size:10px;color:var(--black);font-weight:600;">Share List →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-label">Smart Grocery</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="section-inner">
+    <div class="section-tag">↓ Who It's For</div>
+    <h2 class="section-title">Every body is different</h2>
+    <p class="section-sub">NutriSense adapts to your life — whether you're managing a condition, raising kids, or just starting your health journey.</p>
+
+    <div class="users-grid">
+      <div class="user-card">
+        <div class="user-quote">"I'm pre-diabetic and had no idea which foods were spiking my glucose. NutriSense connected to my Libre and now I can literally see the impact within 2 hours."</div>
+        <div class="user-info">
+          <div class="user-avatar" style="background:linear-gradient(135deg,#f87171,#c084fc);">🧑</div>
+          <div>
+            <div class="user-name">Marcus, 44</div>
+            <div class="user-role">Pre-diabetic · Uses CGM integration</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="user-card">
+        <div class="user-quote">"My daughter is 8. I use the kids mode to show her what's actually in her snacks. She now asks to scan food before eating it. That's a win."</div>
+        <div class="user-info">
+          <div class="user-avatar" style="background:linear-gradient(135deg,var(--amber),var(--lime));">👩</div>
+          <div>
+            <div class="user-name">Priya, 34</div>
+            <div class="user-role">Parent of 2 · No wearable</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="user-card">
+        <div class="user-quote">"I shop at local markets where nothing has English labels. The multilingual scan translates ingredient lists into English instantly. Game changer."</div>
+        <div class="user-info">
+          <div class="user-avatar" style="background:linear-gradient(135deg,var(--teal),var(--green));">🧔</div>
+          <div>
+            <div class="user-name">Ahmed, 29</div>
+            <div class="user-role">Expat in Dubai · Arabic + English</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="background:var(--dark);border-top:1px solid var(--border);">
+  <div class="section-inner" style="text-align:center;">
+    <div class="section-tag">↓ Pricing</div>
+    <h2 class="section-title">Start free. Upgrade when you're ready.</h2>
+    <p class="section-sub" style="margin:0 auto;">No credit card to start. Cancel anytime.</p>
+
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">Free</div>
+        <div class="pricing-price"><sup>$</sup>0 <span>/ month</span></div>
+        <div class="pricing-features">
+          <div class="pricing-feat"><span class="check">✓</span>Unlimited food scanning</div>
+          <div class="pricing-feat"><span class="check">✓</span>Label ingredient decoder</div>
+          <div class="pricing-feat"><span class="check">✓</span>Basic food log</div>
+          <div class="pricing-feat"><span class="check">✓</span>Weekly summary</div>
+          <div class="pricing-feat" style="opacity:0.3;">✗ Wearable sync</div>
+          <div class="pricing-feat" style="opacity:0.3;">✗ Risk forecasting</div>
+          <div class="pricing-feat" style="opacity:0.3;">✗ CGM integration</div>
+        </div>
+        <button class="pricing-btn ghost">Get Started Free</button>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-price"><sup>$</sup>9<span>.99 / month</span></div>
+        <div class="pricing-features">
+          <div class="pricing-feat"><span class="check">✓</span>Everything in Free</div>
+          <div class="pricing-feat"><span class="check">✓</span>Wearable + CGM sync</div>
+          <div class="pricing-feat"><span class="check">✓</span>Risk forecasting engine</div>
+          <div class="pricing-feat"><span class="check">✓</span>AI meal planner</div>
+          <div class="pricing-feat"><span class="check">✓</span>Smart grocery lists</div>
+          <div class="pricing-feat"><span class="check">✓</span>Any language support</div>
+          <div class="pricing-feat"><span class="check">✓</span>Doctor-ready PDF export</div>
+        </div>
+        <button class="pricing-btn primary">Start 14-day Free Trial →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-orb"></div>
+  <h2 class="cta-title">
+    Your body deserves<br/>
+    <em style="font-style:italic;color:var(--green);">clarity, not confusion.</em>
+  </h2>
+  <p class="cta-sub">Join thousands of people who are finally understanding what they eat — and what it's doing to their body.</p>
+  <div class="cta-actions">
+    <div class="email-input-row">
+      <input class="email-input" type="email" placeholder="Enter your email..."/>
+      <button class="email-submit">Join Waitlist →</button>
+    </div>
+  </div>
+  <div style="margin-top:20px;font-size:13px;color:var(--muted);">Free to join · No spam · Early access coming soon</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">NutriSense</div>
+  <div>© 2025 NutriSense. All rights reserved.</div>
+  <div style="display:flex;gap:24px;">
+    <a href="#" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--muted)'">Privacy</a>
+    <a href="#" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--muted)'">Terms</a>
+    <a href="#" style="color:var(--muted);text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--muted)'">Contact</a>
+  </div>
+</footer>
+
+</body>
+</html>
